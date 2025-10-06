@@ -6,12 +6,12 @@ import jakarta.validation.constraints.Size;
 
 import com.example.manage_revenue_ticket.Enum.UserRole;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserRequestDto {
 

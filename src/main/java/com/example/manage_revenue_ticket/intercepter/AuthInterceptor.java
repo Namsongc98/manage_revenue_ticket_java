@@ -3,7 +3,9 @@ package com.example.manage_revenue_ticket.intercepter;
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
 import com.example.manage_revenue_ticket.Enum.UserRole;
 import com.example.manage_revenue_ticket.anotation.NoAuth;
+import com.example.manage_revenue_ticket.anotation.RoleRequired;
 import com.example.manage_revenue_ticket.entity.User;
+import com.example.manage_revenue_ticket.exception.UnauthorizedRoleException;
 import com.example.manage_revenue_ticket.service.UserService;
 import com.example.manage_revenue_ticket.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,34 +44,15 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 //        // Kiểm tra annotation @NoAuth
         NoAuth noAuth = handlerMethod.getMethodAnnotation(NoAuth.class);
-//        AdminOnly adminOnly = handlerMethod.getMethodAnnotation(AdminOnly.class);
-//        CustomerOnly customerOnly = handlerMethod.getMethodAnnotation(CustomerOnly.class);
-//        StaffOnly staffOnly = handlerMethod.getMethodAnnotation(StaffOnly.class);
 
-//        RoleRequired roleRequired = handlerMethod.getMethodAnnotation(RoleRequired.class);
+        RoleRequired roleRequired = handlerMethod.getMethodAnnotation(RoleRequired.class);
 
         if (noAuth == null) {
             noAuth = handlerMethod.getBeanType().getAnnotation(NoAuth.class);
         }
-//        if (adminOnly == null) {
-//            adminOnly = handlerMethod.getBeanType().getAnnotation(AdminOnly.class);
-//        }
-//        if (customerOnly == null) {
-//            customerOnly = handlerMethod.getBeanType().getAnnotation(CustomerOnly.class);
-//        }
-//        if (staffOnly == null) {
-//            staffOnly = handlerMethod.getBeanType().getAnnotation(StaffOnly.class);
-//        }
 
         if (noAuth != null) {
             return true; // API public, bỏ qua check
-        }
-
-        String path = request.getRequestURI();
-
-        // Ví dụ: bỏ qua auth cho ảnh avatar
-        if (path.startsWith("/avatars/")) {
-            return true; // cho phép request đi tiếp
         }
 
         // Lấy token từ header
@@ -80,20 +63,19 @@ public class AuthInterceptor implements HandlerInterceptor {
             System.out.println(jwtUtil.validateToken(jwtToken));
             if (jwtUtil.validateToken(jwtToken)) {
                 Long userId = jwtUtil.extractUserId(jwtToken);
-                User user = userService.getUserById(userId);
-                UserRole userRole = user.getRole();
-//                boolean authorized =
-//                        (adminOnly != null && userRole == Role.ADMIN)
-//                                || (customerOnly != null && userRole == Role.CUSTOMER)
-//                                || (staffOnly != null && userRole == Role.STAFF)
-//                                ||  Arrays.asList(roleRequired.value()).contains(userRole);
 
-//                if (authorized) {
-//                    request.setAttribute("id", userId);
-//                    return true;
-//                } else {
-//                    return false;
-//                }
+                String userRole = jwtUtil.getRoleFromToken(jwtToken);
+                System.out.println("interceptor check role"+userRole);
+               boolean authorized =
+                          Arrays.asList(roleRequired.value()).contains(userRole);
+
+                if (authorized) {
+                    request.setAttribute("id", userId);
+                    request.setAttribute("role", userRole);
+                    return true;
+                } else {
+                    throw new UnauthorizedRoleException("Bạn không có quyền truy cập tài nguyên này.");
+                }
             }
         }
 

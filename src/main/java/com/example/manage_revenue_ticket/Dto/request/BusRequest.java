@@ -6,7 +6,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class BusRequest {
-    private Long id; // Nếu có -> cập nhật, nếu null -> thêm mới
     private String plateNumber;
     private Integer capacity;
     private String status;

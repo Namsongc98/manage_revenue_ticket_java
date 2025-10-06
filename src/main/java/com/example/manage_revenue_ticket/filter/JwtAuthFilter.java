@@ -1,6 +1,7 @@
-package com.example.manage_revenue_ticket.fillter;
+package com.example.manage_revenue_ticket.filter;
 
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
+import com.example.manage_revenue_ticket.Enum.UserRole;
 import com.example.manage_revenue_ticket.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -13,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.Collections;
 import java.util.List;
 
+@Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -44,8 +47,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // Lấy token từ header Authorization: Bearer xxx
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 jwtToken = authHeader.substring(7);
-                System.out.println("jwtToken");
-                System.out.println(jwtToken);
                 System.out.println(jwtUtil.validateToken(jwtToken));
                 if (jwtUtil.validateToken(jwtToken)) {
                     userId = jwtUtil.extractUserId(jwtToken);
@@ -56,10 +57,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             System.out.println("Request path: " + path);
 
             // Ví dụ: bỏ qua auth cho ảnh avatar
-            if (path.startsWith("/avatars/") || path.equals("/login")) {
+            if (path.startsWith("/avatars/") || path.startsWith("/api/auth/")) {
                 filterChain.doFilter(request, response);
+                return;
             }else {
-                System.out.println(userId != null && SecurityContextHolder.getContext().getAuthentication() == null);
+                System.out.println("startsWith" + userId != null && SecurityContextHolder.getContext().getAuthentication() == null);
+
                 if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     List<GrantedAuthority> authorities =
                             Collections.singletonList(new SimpleGrantedAuthority("ADMIN"));

@@ -47,21 +47,20 @@ public class AuthService {
         }
     }
 
-    public User updatePassWord(@Valid UserRequestDto user){
-        String email = user.getEmail();
+    public void updatePassWord(@Valid UserRequestDto userRequest, String oldPassword){
+        String email = userRequest.getEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
 
         // Kiểm tra xem user đã có mật khẩu chưa
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            throw new RuntimeException("Tài khoản đã có mật khẩu, không thể đặt lại theo cách này!");
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng");
         }
-
+        System.out.println(userRequest.getPassword());
+        String newPassword = passwordEncoder.encode(userRequest.getPassword());
         // Mã hoá mật khẩu mới
-        user.setPassword(passwordEncoder.encode(newPassword));
-
+        user.setPassword(newPassword);
         userRepository.save(user);
-        return "Đặt mật khẩu thành công cho tài khoản: " + user.getEmail();
     }
 
     public User login(@Valid UserRequestDto user){
@@ -73,7 +72,7 @@ public class AuthService {
         if(passwordEncoder.matches(password, checkUser.getPassword())){
             return checkUser;
         }else {
-            throw new RuntimeException("Invalid username or password");
+            throw new RuntimeException("Invalid email or password");
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.manage_revenue_ticket.service;
 
 import com.example.manage_revenue_ticket.Dto.request.BusRequest;
+import com.example.manage_revenue_ticket.Enum.BusStatus;
 import com.example.manage_revenue_ticket.entity.Buses;
 import com.example.manage_revenue_ticket.repository.BusesRepository;
 import org.springframework.stereotype.Service;
@@ -24,21 +25,17 @@ public class BusService {
             bus = Buses.builder()
                     .plateNumber(request.getPlateNumber())
                     .capacity(request.getCapacity())
-                    .status(request.getStatus())
-                    .createdAt(LocalDateTime.now())
+                    .status(BusStatus.valueOf(request.getStatus().toUpperCase()))
                     .build();
-
         return busRepository.save(bus);
     }
-    public Buses update(BusRequest request) {
+    public Buses update(Long busId,BusRequest request) {
         Buses bus;
-            // Cập nhật xe
-            bus = busRepository.findById(request.getId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy xe với id: " + request.getId()));
+            bus = busRepository.findById(busId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy xe với id: " + busId));
             bus.setPlateNumber(request.getPlateNumber());
             bus.setCapacity(request.getCapacity());
-            bus.setStatus(request.getStatus());
-            bus.setUpdatedAt(LocalDateTime.now());
+            bus.setStatus(BusStatus.valueOf(request.getStatus().toUpperCase()));
         return busRepository.save(bus);
     }
 }
