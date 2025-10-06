@@ -2,6 +2,7 @@ package com.example.manage_revenue_ticket.intercepter;
 
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
 import com.example.manage_revenue_ticket.Enum.UserRole;
+import com.example.manage_revenue_ticket.anotation.NoAuth;
 import com.example.manage_revenue_ticket.entity.User;
 import com.example.manage_revenue_ticket.service.UserService;
 import com.example.manage_revenue_ticket.util.JwtUtil;
@@ -40,16 +41,16 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 
 //        // Kiểm tra annotation @NoAuth
-//        NoAuth noAuth = handlerMethod.getMethodAnnotation(NoAuth.class);
+        NoAuth noAuth = handlerMethod.getMethodAnnotation(NoAuth.class);
 //        AdminOnly adminOnly = handlerMethod.getMethodAnnotation(AdminOnly.class);
 //        CustomerOnly customerOnly = handlerMethod.getMethodAnnotation(CustomerOnly.class);
 //        StaffOnly staffOnly = handlerMethod.getMethodAnnotation(StaffOnly.class);
 
 //        RoleRequired roleRequired = handlerMethod.getMethodAnnotation(RoleRequired.class);
 
-//        if (noAuth == null) {
-//            noAuth = handlerMethod.getBeanType().getAnnotation(NoAuth.class);
-//        }
+        if (noAuth == null) {
+            noAuth = handlerMethod.getBeanType().getAnnotation(NoAuth.class);
+        }
 //        if (adminOnly == null) {
 //            adminOnly = handlerMethod.getBeanType().getAnnotation(AdminOnly.class);
 //        }
@@ -60,9 +61,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 //            staffOnly = handlerMethod.getBeanType().getAnnotation(StaffOnly.class);
 //        }
 
-//        if (noAuth != null) {
-//            return true; // API public, bỏ qua check
-//        }
+        if (noAuth != null) {
+            return true; // API public, bỏ qua check
+        }
 
         String path = request.getRequestURI();
 

@@ -1,17 +1,33 @@
 package com.example.manage_revenue_ticket.util;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    @Value("${jwt.secret}")
+    private String key;
+
+    public JwtUtil(String key) {
+        this.key = key;
+    }
+
+
+    private Key getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(key);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
     // Tạo Access Token
     public String generateAccessToken(Long idUser) {
@@ -20,7 +36,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(String.valueOf(idUser))
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(key)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -31,14 +47,14 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(String.valueOf(idUser))
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
-                .signWith(key)
+                .signWith(getSigningKey())
                 .compact();
     }
 
     // Lấy username từ token
     public Long extractUserId(String token) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -48,7 +64,7 @@ public class JwtUtil {
     // Kiểm tra token hợp lệ
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
             return false;

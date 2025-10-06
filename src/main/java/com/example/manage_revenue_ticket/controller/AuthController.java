@@ -47,11 +47,24 @@ public class AuthController {
         user.setEmail(req.getEmail());
         user.setPassword(req.getPassword());
         user.setRole(req.getRole());
-        User savedUser = authService.register(req);
+        User savedUser = authService.updatePassWord(req);
         String accessToken = jwtUtil.generateAccessToken(savedUser.getId());
         String refreshToken = jwtUtil.generateRefreshToken(savedUser.getId());
         TokenResponse token = new TokenResponse(accessToken, refreshToken);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponseDto.success(201, "Register successfully", token));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<BaseResponseDto<TokenResponse>> login(@Valid @RequestBody UserRequestDto req){
+        User user = new User();
+        user.setEmail(req.getEmail());
+        user.setPassword(req.getPassword());
+        user.setRole(req.getRole());
+        User loginUser = authService.login(req);
+        String accessToken = jwtUtil.generateAccessToken(loginUser.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(loginUser.getEmail());
+        TokenResponse token = new TokenResponse(accessToken, refreshToken, loginUser);
+        return ResponseEntity.ok(BaseResponseDto.success(200,"Get successfully",token));
     }
 }

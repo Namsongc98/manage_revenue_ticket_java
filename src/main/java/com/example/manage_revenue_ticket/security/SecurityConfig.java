@@ -1,4 +1,4 @@
-package com.example.manage_revenue_ticket.config;
+package com.example.manage_revenue_ticket.security;
 
 import com.example.manage_revenue_ticket.exception.CustomAccessDeniedHandler;
 import com.example.manage_revenue_ticket.exception.CustomAuthEntryPoint;

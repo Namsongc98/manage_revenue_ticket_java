@@ -7,6 +7,7 @@ import com.example.manage_revenue_ticket.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -46,19 +47,33 @@ public class AuthService {
         }
     }
 
-//    public User updateWord(@Valid UserRequestDto user){
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
-//
-//        // Kiểm tra xem user đã có mật khẩu chưa
-//        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-//            throw new RuntimeException("Tài khoản đã có mật khẩu, không thể đặt lại theo cách này!");
-//        }
-//
-//        // Mã hoá mật khẩu mới
-//        user.setPassword(passwordEncoder.encode(newPassword));
-//
-//        userRepository.save(user);
-//        return "Đặt mật khẩu thành công cho tài khoản: " + user.getEmail();
-//    }
+    public User updatePassWord(@Valid UserRequestDto user){
+        String email = user.getEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+
+        // Kiểm tra xem user đã có mật khẩu chưa
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            throw new RuntimeException("Tài khoản đã có mật khẩu, không thể đặt lại theo cách này!");
+        }
+
+        // Mã hoá mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+        return "Đặt mật khẩu thành công cho tài khoản: " + user.getEmail();
+    }
+
+    public User login(@Valid UserRequestDto user){
+        String email = user.getEmail();
+        String password = user.getPassword();
+
+        User checkUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if(passwordEncoder.matches(password, checkUser.getPassword())){
+            return checkUser;
+        }else {
+            throw new RuntimeException("Invalid username or password");
+        }
+    }
 }
