@@ -1,6 +1,8 @@
 package com.example.manage_revenue_ticket.entity;
 
+import com.example.manage_revenue_ticket.Enum.DriverStatus;
 import com.example.manage_revenue_ticket.Enum.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +31,7 @@ public class User {
     private String email;
 
     @Column(name = "password", length = 255, nullable = false)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -43,6 +46,10 @@ public class User {
 
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "driver_status")
+    private DriverStatus driverStatus;
 
     @PrePersist
     protected void onCreate() {

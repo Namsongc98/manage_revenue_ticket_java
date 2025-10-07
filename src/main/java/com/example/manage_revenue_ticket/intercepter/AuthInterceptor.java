@@ -19,6 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -40,24 +41,20 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }
-
-
 //        // Kiểm tra annotation @NoAuth
         NoAuth noAuth = handlerMethod.getMethodAnnotation(NoAuth.class);
-
         RoleRequired roleRequired = handlerMethod.getMethodAnnotation(RoleRequired.class);
-
         if (noAuth == null) {
             noAuth = handlerMethod.getBeanType().getAnnotation(NoAuth.class);
         }
-
         if (noAuth != null) {
             return true; // API public, bỏ qua check
         }
-
+        if(roleRequired == null){
+            throw new UnauthorizedRoleException("Bạn không có quyền truy cập tài nguyên này.");
+        }
         // Lấy token từ header
         String authHeader = request.getHeader("Authorization");
-        System.out.println(authHeader);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String jwtToken = authHeader.substring(7);
             System.out.println(jwtUtil.validateToken(jwtToken));
@@ -65,10 +62,9 @@ public class AuthInterceptor implements HandlerInterceptor {
                 Long userId = jwtUtil.extractUserId(jwtToken);
 
                 String userRole = jwtUtil.getRoleFromToken(jwtToken);
-                System.out.println("interceptor check role"+userRole);
-               boolean authorized =
-                          Arrays.asList(roleRequired.value()).contains(userRole);
-
+                UserRole[] allowedRoles = roleRequired.value();
+                boolean authorized = Arrays.stream(allowedRoles)
+                        .anyMatch(role -> role.name().equalsIgnoreCase(userRole));
                 if (authorized) {
                     request.setAttribute("id", userId);
                     request.setAttribute("role", userRole);
@@ -78,13 +74,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                 }
             }
         }
-
         // Token sai hoặc không có → 401
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write(mapper.writeValueAsString(
                 BaseResponseDto.error(HttpServletResponse.SC_UNAUTHORIZED,
                         "Unauthorized - Invalid or missing JWT")));
-
         return false;
     };
 }

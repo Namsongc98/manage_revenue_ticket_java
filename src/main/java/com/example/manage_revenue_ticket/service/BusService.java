@@ -4,6 +4,8 @@ import com.example.manage_revenue_ticket.Dto.request.BusRequest;
 import com.example.manage_revenue_ticket.Enum.BusStatus;
 import com.example.manage_revenue_ticket.entity.Buses;
 import com.example.manage_revenue_ticket.repository.BusesRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,10 +27,11 @@ public class BusService {
             bus = Buses.builder()
                     .plateNumber(request.getPlateNumber())
                     .capacity(request.getCapacity())
-                    .status(BusStatus.valueOf(request.getStatus().toUpperCase()))
+                    .status(BusStatus.valueOf(request.getStatus()))
                     .build();
         return busRepository.save(bus);
     }
+
     public Buses update(Long busId,BusRequest request) {
         Buses bus;
             bus = busRepository.findById(busId)
@@ -37,5 +40,9 @@ public class BusService {
             bus.setCapacity(request.getCapacity());
             bus.setStatus(BusStatus.valueOf(request.getStatus().toUpperCase()));
         return busRepository.save(bus);
+    }
+
+    public Page<Buses> getBuses(Pageable pageable){
+            return busRepository.findAll(pageable);
     }
 }
