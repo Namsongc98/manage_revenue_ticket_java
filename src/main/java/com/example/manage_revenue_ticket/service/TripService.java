@@ -86,10 +86,10 @@ public class TripService {
         if (requestDto.getBusId() != null) {
              bus = busRepository.findById(requestDto.getBusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe có ID: " + requestDto.getBusId()));
-            if (bus.getStatus() != BusStatus.INACTIVE) {
+            if (bus.getStatus() == BusStatus.INACTIVE) {
                 throw new IllegalArgumentException("Bus có biển " + bus.getPlateNumber() + " đang gặp vấn đề không thể chạy.");
             }
-            if (bus.getStatus() != BusStatus.ACTIVE) {
+            if (bus.getStatus() == BusStatus.ACTIVE) {
                 throw new IllegalArgumentException("Bus có biển " + bus.getPlateNumber() + " đang chạy chuyển khác.");
             }
             trip.setBus(bus);
