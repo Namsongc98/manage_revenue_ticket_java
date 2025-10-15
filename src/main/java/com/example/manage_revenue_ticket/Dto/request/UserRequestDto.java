@@ -15,6 +15,8 @@ import lombok.*;
 @Builder
 public class UserRequestDto {
 
+    private Long id;
+
     private UserRole role;     // optional
 
     @Email(message = "Invalid email format")

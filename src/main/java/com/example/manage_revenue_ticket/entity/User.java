@@ -1,5 +1,6 @@
 package com.example.manage_revenue_ticket.entity;
 
+import com.example.manage_revenue_ticket.Enum.CustomerStatus;
 import com.example.manage_revenue_ticket.Enum.DriverStatus;
 import com.example.manage_revenue_ticket.Enum.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,6 +51,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "driver_status")
     private DriverStatus driverStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_status")
+    private CustomerStatus userStatus;
 
     @PrePersist
     protected void onCreate() {

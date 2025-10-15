@@ -6,29 +6,61 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query(value = """
-        SELECT\s
-            b.id AS busId,\s
-            b.plate_number AS bienSoXe,\s
-            b.capacity AS dungTich,\s
-            b.status AS busStatus,\s
-            t.revenue AS doanhThu,\s
-            t.departure_time AS khoiHanhTime,\s
-            t.arrival_time AS denTime,
-            r.route_name AS tenChuyen,\s
-            r.start_point AS choKhoiHang,\s
-            r.end_point AS choDen,\s
-            r.distance_km AS km
-        FROM buses b
-        JOIN trips t ON t.bus_id = b.id
-        JOIN routes r ON t.route_id = r.id
-        WHERE r.status = 'ACTIVE'\s
-          AND t.status = 'SCHEDULED'
-          AND b.status = 'PENDING'
-          AND t.id = :tripId
-   \s""", nativeQuery = true)
-    List<Object[]> findTripBusRouteInfo(@Param("tripId") Long tripId);
+    SELECT COUNT(tk.id)
+    FROM tickets tk
+    JOIN trips tr ON tk.trip_id = tr.id
+    WHERE tr.bus_id = :busId
+""", nativeQuery = true)
+    int countTicketsByBusId(@Param("busId") Long busId);
+
+    @Query(value = """
+    SELECT COUNT(tk.id)
+    FROM tickets tk
+    JOIN trips tr ON tk.trip_id = tr.id
+    WHERE tr.bus_id = :busId
+""", nativeQuery = true)
+    int countTicketFollowBus(@Param("busId") Long busId);
+
+    @Query(value = """
+        SELECT 
+            b.id AS bus_id,
+            b.plate_number AS bienSoXe,
+            u_seller.email AS nhanVienThuVe,
+            u_driver.email AS laiXe,
+            COUNT(tk.id) AS tongSoVe,
+            SUM(tk.price) AS tongTienVe
+        FROM tickets tk
+        JOIN trips tr ON tk.trip_id = tr.id
+        JOIN buses b ON tr.bus_id = b.id
+        LEFT JOIN users u_seller ON tk.seller_id = u_seller.id
+        LEFT JOIN users u_driver ON tr.driver_id = u_driver.id
+        WHERE (:busId IS NULL OR b.id = :busId)
+          AND tk.issued_at BETWEEN :fromDate AND :toDate
+        GROUP BY 
+            b.id, b.plate_number, u_seller.email, u_driver.email
+        ORDER BY 
+            b.id, u_seller.email
+    """, nativeQuery = true)
+    List<Map<String, Object>> getTicketSummaryByBusAndTime(
+            @Param("busId") Long busId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
+    );
+
+    @Query("""
+            select count(t.id) as total
+            from Ticket t where t.seller.id = :sellerId
+            	and MONTH(t.issuedAt) = :month
+            	AND YEAR(t.issuedAt) = :year
+            	and t.userStatus = 'BOOKED'
+            group by seller.id
+            """)
+        Long countCompletedTripsBySeller(@Param("month") byte month, @Param("year") short year,@Param("sellerId") Long sellerId);
+
 }

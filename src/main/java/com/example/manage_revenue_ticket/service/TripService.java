@@ -17,6 +17,11 @@ import com.example.manage_revenue_ticket.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class TripService {
 
@@ -118,5 +123,27 @@ public class TripService {
         if (requestDto.getStatus() != null) trip.setStatus(requestDto.getStatus());
         if (requestDto.getRevenue() != null) trip.setRevenue(requestDto.getRevenue());
         return tripRepository.save(trip);
+    }
+
+    public List<Map<String, Object>> getTripScheduled(){
+        List<Object[]> rows =  tripRepository.findTripBusRouteInfo();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("busId", row[0]);
+            map.put("bienSoXe", row[1]);
+            map.put("dungTich", row[2]);
+            map.put("busStatus", row[3]);
+            map.put("doanhThu", row[4]);
+            map.put("khoiHanhTime", row[5]);
+            map.put("denTime", row[6]);
+            map.put("tenChuyen", row[7]);
+            map.put("choKhoiHang", row[8]);
+            map.put("choDen", row[9]);
+            map.put("km", row[10]);
+            result.add(map);
+        }
+        return result;
     }
 }

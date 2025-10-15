@@ -26,7 +26,7 @@ public class BusController {
     private BusService busService;
 
     @GetMapping
-    @NoAuth
+    @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
     ResponseEntity<BaseResponseDto<Page<Buses>>> getBuses(@PageableDefault(size = 10) Pageable pageable){
         Page<Buses> listBus = busService.getBuses(pageable);
         Map<String, Object> response = new HashMap<>();

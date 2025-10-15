@@ -11,8 +11,7 @@ public class TicketResponseDto {
     private Long tripId;
     private Long sellerId;
     private Long customerId;
-    private Integer setNumber;
+    private Integer seatNumber;
     private BigDecimal price;
     private LocalDateTime issuedAt;
-
 }

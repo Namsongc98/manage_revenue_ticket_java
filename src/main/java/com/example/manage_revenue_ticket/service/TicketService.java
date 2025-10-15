@@ -1,6 +1,7 @@
 package com.example.manage_revenue_ticket.service;
 
 import com.example.manage_revenue_ticket.Dto.request.TicketResponseDto;
+import com.example.manage_revenue_ticket.Enum.CustomerStatus;
 import com.example.manage_revenue_ticket.Enum.DriverStatus;
 import com.example.manage_revenue_ticket.Enum.TripStatus;
 import com.example.manage_revenue_ticket.Enum.UserRole;
@@ -16,6 +17,7 @@ import com.example.manage_revenue_ticket.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,7 @@ public class TicketService {
     private BusesRepository busesRepository;
 
 
-    public void createTicket(TicketResponseDto responseDto){
+    public Ticket createTicket(TicketResponseDto responseDto){
 
         Trip trip =  tripRepository.findById(responseDto.getTripId())
                 .orElseThrow(()->new ResourceNotFoundException("Không tìm thấy chuyến xe " + responseDto.getTripId()));
@@ -49,34 +51,55 @@ public class TicketService {
         User seller = userRepository.findById(responseDto.getSellerId())
                 .orElseThrow(()->new ResourceNotFoundException("Không thấy người bán này"));
 
-        if(customer.getRole() == UserRole.DRIVER && customer.getDriverStatus() == DriverStatus.ACTIVE){
-            throw new IllegalArgumentException("Bác tài số" + responseDto.getCustomerId() + " đang chạy chuyến khác!");
+        if(customer.getUserStatus() == CustomerStatus.BOOKED){
+            throw new IllegalArgumentException("Khách hàng đã đặt vé");
+        };
+        customer.setUserStatus(CustomerStatus.BOOKED);
+        userRepository.save(customer);
+        Buses bus = trip.getBus();
+        int countTicket = ticketRepository.countTicketsByBusId(bus.getId());
+        if(countTicket == bus.getCapacity()){
+            throw  new ResourceNotFoundException("chuyến đi có số lượng "+ bus.getCapacity() + " số vé "+countTicket+" đã hết vé");
         }
-        if(customer.getRole() == UserRole.DRIVER && customer.getDriverStatus() == DriverStatus.INACTIVE){
-            throw new IllegalArgumentException("Bác tài số" + responseDto.getCustomerId() + " không thể chạy chuyến!");
-        }
-
-//        Buses buses = busesRepository.findById(trip)
-        List<Object[]> results = ticketRepository.findTripBusRouteInfo(responseDto.getTripId());
-
-        List<Map<String, Object>> dataList = new ArrayList<>();
-
-        for (Object[] row : results) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("busId", row[0]);
-            map.put("bienSoXe", row[1]);
-            map.put("dungTich", row[2]);
-            map.put("busStatus", row[3]);
-            map.put("doanhThu", row[4]);
-            map.put("khoiHanhTime", row[5]);
-            map.put("denTime", row[6]);
-            map.put("tenChuyen", row[7]);
-            map.put("choKhoiHang", row[8]);
-            map.put("choDen", row[9]);
-            map.put("km", row[10]);
-            dataList.add(map);
-        }
-        System.out.println(results);
+        Ticket ticket = Ticket.builder()
+                .trip(trip)
+                .seller(seller)
+                .customer(customer)
+                .price(responseDto.getPrice())
+                .seatNumber(responseDto.getSeatNumber())
+                .issuedAt(responseDto.getIssuedAt())
+                .build();
+        ticketRepository.save(ticket);
+        return ticket;
     };
 
+    public Ticket updateTicket(Long ticketId, TicketResponseDto responseDto){
+
+        Ticket ticket;
+        ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(()->new ResourceNotFoundException("Không tìm thấy vé xe " + responseDto.getTripId()));
+
+        Trip trip =  tripRepository.findById(responseDto.getTripId())
+                .orElseThrow(()->new ResourceNotFoundException("Không tìm thấy chuyến xe " + responseDto.getTripId()));
+        if(trip.getStatus() == TripStatus.ONGOING){
+            throw new IllegalArgumentException("Chuyến xe này đang trong chuyến!");
+        };
+        User customer = userRepository.findById(responseDto.getCustomerId())
+                .orElseThrow(()->new ResourceNotFoundException("Không thấy người dùng này"));
+
+        User seller = userRepository.findById(responseDto.getSellerId())
+                .orElseThrow(()->new ResourceNotFoundException("Không thấy người bán này"));
+        if(responseDto.getPrice() != null) ticket.setPrice(responseDto.getPrice());
+        if(responseDto.getSeatNumber() !=null ) ticket.setSeatNumber(responseDto.getSeatNumber());
+        ticket.setSeller(seller);
+        ticket.setCustomer(customer);
+        customer.setUserStatus(CustomerStatus.BOOKED);
+        userRepository.save(customer);
+        ticketRepository.save(ticket);
+        return ticket;
+    };
+
+    public List<Map<String, Object>> getTicketSummaryByBusAndTime(Long busId, LocalDateTime fromDate, LocalDateTime toDate) {
+        return ticketRepository.getTicketSummaryByBusAndTime(busId, fromDate, toDate);
+    }
 }
