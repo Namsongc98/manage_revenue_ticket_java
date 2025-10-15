@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Buses {
+public class Buses extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +30,7 @@ public class Buses {
     private Integer capacity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "ENUM('ACTIVE','INACTIVE') DEFAULT 'ACTIVE'")
-    private BusStatus status = BusStatus.INACTIVE;
+    @Column(name = "status", nullable = false, columnDefinition = "ENUM('ACTIVE','INACTIVE','PENDING') DEFAULT 'ACTIVE'")
+    private BusStatus status = BusStatus.PENDING;
 
 }

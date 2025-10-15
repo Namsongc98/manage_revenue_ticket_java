@@ -1,7 +1,6 @@
 package com.example.manage_revenue_ticket.entity;
 
-import com.example.manage_revenue_ticket.Enum.UserRole;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.manage_revenue_ticket.Enum.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Ticket {
+public class Ticket extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +41,10 @@ public class Ticket {
 
     @Column(name = "price", precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_status")
+    private CustomerStatus userStatus;
 
     @Column(name = "issued_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime issuedAt;

@@ -47,7 +47,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // Lấy token từ header Authorization: Bearer xxx
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 jwtToken = authHeader.substring(7);
-                System.out.println(jwtUtil.validateToken(jwtToken));
                 if (jwtUtil.validateToken(jwtToken)) {
                     userId = jwtUtil.extractUserId(jwtToken);
                     System.out.println(userId);
@@ -57,7 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             System.out.println("Request path: " + path);
 
             // Ví dụ: bỏ qua auth cho ảnh avatar
-            if (path.startsWith("/avatars/") || path.startsWith("/api/auth/")) {
+            if (path.startsWith("/avatars/") || path.startsWith("/api/auth/") || path.startsWith("/api/ticket/summary/excel")) {
                 filterChain.doFilter(request, response);
                 return;
             }else {
@@ -74,9 +73,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-
             // Nếu token hợp lệ và chưa có authentication
-
             filterChain.doFilter(request, response);
         } catch (AccessDeniedException ex) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
