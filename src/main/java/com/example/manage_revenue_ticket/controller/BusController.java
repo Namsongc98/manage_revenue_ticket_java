@@ -10,6 +10,7 @@ import com.example.manage_revenue_ticket.entity.Buses;
 import com.example.manage_revenue_ticket.service.BusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,10 @@ public class BusController {
 
     @GetMapping
     @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
-    ResponseEntity<BaseResponseDto<Page<Buses>>> getBuses(@PageableDefault(size = 10) Pageable pageable){
+    ResponseEntity<BaseResponseDto<Page<Buses>>> getBuses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
         Page<Buses> listBus = busService.getBuses(pageable);
         Map<String, Object> response = new HashMap<>();
         response.put("content", listBus.getContent());

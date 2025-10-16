@@ -33,7 +33,7 @@ public class JwtUtil {
     // Tạo Access Token
     public String generateAccessToken(Long idUser, UserRole role) {
         // 15 phút
-        long accessTokenExpiration = 1000 * 60 * 15;
+        long accessTokenExpiration = 1000 * 60 * 60 * 24;
         return Jwts.builder()
                 .setSubject(String.valueOf(idUser))
                 .claim("role", role)

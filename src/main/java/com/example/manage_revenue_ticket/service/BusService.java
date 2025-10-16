@@ -17,6 +17,7 @@ public class BusService {
     @Autowired
     private BusesRepository busRepository;
 
+    // tạo xe bus
     public Buses save(BusRequest request) {
         Buses bus;
             // Thêm mới xe
@@ -31,7 +32,7 @@ public class BusService {
                     .build();
         return busRepository.save(bus);
     }
-
+    // update thông tin xe bus
     public Buses update(Long busId,BusRequest request) {
         Buses bus;
             bus = busRepository.findById(busId)

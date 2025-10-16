@@ -23,6 +23,7 @@ public class BaseSalaryService {
     @Autowired
     private UserRepository userRepository;
 
+    // tạo base lương
     public BaseSalary save(Long userId, BigDecimal salary, LocalDate effectiveFrom) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
@@ -36,6 +37,7 @@ public class BaseSalaryService {
         return baseSalaryRepository.save(baseSalary);
     }
 
+    // update base lương
     public BaseSalary updateBaseSalary(Long id, BigDecimal newSalary) {
         BaseSalary baseSalary = baseSalaryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy base salary với id: " + id));

@@ -15,12 +15,16 @@ import com.example.manage_revenue_ticket.repository.RouteRepository;
 import com.example.manage_revenue_ticket.repository.TripRepository;
 import com.example.manage_revenue_ticket.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TripService {
@@ -34,7 +38,7 @@ public class TripService {
     @Autowired
     private  UserRepository userRepository;
 
-
+   // Tạo chuyến
     public Trip createTrip(TripRequestDto requestDto){
         Route route = routeRepository.findById(requestDto.getRouteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuyến có ID: " + requestDto.getRouteId()));
@@ -77,7 +81,7 @@ public class TripService {
         userRepository.save(driver);
         return savedTrip;
     }
-
+    // update chuyến xe
     public Trip updateTrip(Long tripId, TripRequestDto requestDto){
         Trip trip;
         trip = tripRepository.findById(tripId)
@@ -124,26 +128,24 @@ public class TripService {
         if (requestDto.getRevenue() != null) trip.setRevenue(requestDto.getRevenue());
         return tripRepository.save(trip);
     }
-
-    public List<Map<String, Object>> getTripScheduled(){
-        List<Object[]> rows =  tripRepository.findTripBusRouteInfo();
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        for (Object[] row : rows) {
+    // lấy chuyến xe đang lên lịch
+    public Page<Map<String, Object>> getTripScheduled(Pageable pageable){
+        Page<Object[]> rows =  tripRepository.findTripBusRouteInfo(pageable);
+        List<Map<String, Object>> content = rows.getContent().stream().map(row -> {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("busId", row[0]);
-            map.put("bienSoXe", row[1]);
-            map.put("dungTich", row[2]);
+            map.put("plateNumber", row[1]);
+            map.put("capacity", row[2]);
             map.put("busStatus", row[3]);
-            map.put("doanhThu", row[4]);
-            map.put("khoiHanhTime", row[5]);
-            map.put("denTime", row[6]);
-            map.put("tenChuyen", row[7]);
-            map.put("choKhoiHang", row[8]);
-            map.put("choDen", row[9]);
+            map.put("revenue", row[4]);
+            map.put("departureTime", row[5]);
+            map.put("arrivalTime", row[6]);
+            map.put("nameTrip", row[7]);
+            map.put("startPoint", row[8]);
+            map.put("enPoint", row[9]);
             map.put("km", row[10]);
-            result.add(map);
-        }
-        return result;
+            return map;
+        }).collect(Collectors.toList());
+        return new PageImpl<>(content, pageable, rows.getTotalElements());
     }
 }

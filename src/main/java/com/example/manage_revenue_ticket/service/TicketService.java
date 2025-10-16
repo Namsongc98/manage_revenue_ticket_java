@@ -37,7 +37,7 @@ public class TicketService {
     @Autowired
     private BusesRepository busesRepository;
 
-
+    // tạo vé
     public Ticket createTicket(TicketResponseDto responseDto){
 
         Trip trip =  tripRepository.findById(responseDto.getTripId())
@@ -72,7 +72,7 @@ public class TicketService {
         ticketRepository.save(ticket);
         return ticket;
     };
-
+    // update vé
     public Ticket updateTicket(Long ticketId, TicketResponseDto responseDto){
 
         Ticket ticket;
