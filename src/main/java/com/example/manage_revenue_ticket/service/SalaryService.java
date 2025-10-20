@@ -34,6 +34,9 @@ public class SalaryService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private BaseLoyaltyPointsRepository baseLoyaltyPointsRepository;
+
     // tính lương của Driver theo tháng
     @Transactional
     public void generateMonthlySalaries(byte month, short year) {

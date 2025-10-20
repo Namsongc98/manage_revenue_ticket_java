@@ -34,7 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private ObjectMapper mapper;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+        protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
@@ -76,19 +76,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // Nếu token hợp lệ và chưa có authentication
             filterChain.doFilter(request, response);
         } catch (AccessDeniedException ex) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter()
-                    .write( mapper.writeValueAsString(
-                            BaseResponseDto.error(HttpServletResponse.SC_FORBIDDEN, ex.getMessage())));
+            if (!response.isCommitted()) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(mapper.writeValueAsString(
+                        BaseResponseDto.error(HttpServletResponse.SC_FORBIDDEN, ex.getMessage())));
+            }
         } catch (Exception ex) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter()
-                    .write( mapper.writeValueAsString(
-                            BaseResponseDto.error(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage())));
+            if (!response.isCommitted()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(mapper.writeValueAsString(
+                        BaseResponseDto.error(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage())));
+            }
         }
     }
 

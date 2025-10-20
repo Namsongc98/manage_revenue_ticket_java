@@ -35,7 +35,7 @@ public class TicketController {
     private FileService excelService;
 
     @PostMapping
-    @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
+    @NoAuth
     public ResponseEntity<BaseResponseDto<Ticket>> addTicket(@RequestBody TicketResponseDto responseDto){
         ticketService.createTicket(responseDto);
         return ResponseEntity.ok(BaseResponseDto.success(201,"Add Successfully",null));
