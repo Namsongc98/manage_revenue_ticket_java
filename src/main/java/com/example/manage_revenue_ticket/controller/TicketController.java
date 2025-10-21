@@ -86,5 +86,17 @@ public class TicketController {
         return ResponseEntity.ok(BaseResponseDto.success(201,"Get Successfully",result));
     }
 
+    @PostMapping("/loyalty_reward/{idReward}")
+    @NoAuth
+    public  ResponseEntity<BaseResponseDto<Ticket>> createticketByLoyalty(
+            @RequestBody TicketResponseDto responseDto,
+            @PathVariable Long idReward
+    ){
+        Ticket ticket =  ticketService.createticketByLoyalty(responseDto, idReward);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(BaseResponseDto.success(201, "Add Successfully", ticket));
+    }
+
 
 }

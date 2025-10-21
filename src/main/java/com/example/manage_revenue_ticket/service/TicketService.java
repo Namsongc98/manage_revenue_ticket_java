@@ -8,6 +8,7 @@ import com.example.manage_revenue_ticket.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -36,6 +37,9 @@ public class TicketService {
 
     @Autowired
     private LoyaltyPointsService loyaltyPointsService;
+
+    @Autowired
+    LoyaltyRewardRepository loyaltyRewardRepository;
 
     // tạo vé
     public Ticket createTicket(TicketResponseDto responseDto){
@@ -128,5 +132,72 @@ public class TicketService {
 
     public List<Map<String, Object>> getTicketSummaryByBusAndTime(Long busId, LocalDateTime fromDate, LocalDateTime toDate) {
         return ticketRepository.getTicketSummaryByBusAndTime(busId, fromDate, toDate);
+    }
+
+    public Ticket createticketByLoyalty(TicketResponseDto responseDto, Long idReward){
+        Trip trip =  tripRepository.findById(responseDto.getTripId())
+                .orElseThrow(()->new ResourceNotFoundException("Không tìm thấy chuyến xe " + responseDto.getTripId()));
+        if(trip.getStatus() == TripStatus.ONGOING){
+            throw new IllegalArgumentException("Chuyến xe này đang trong chuyến!");
+        };
+        User customer = userRepository.findById(responseDto.getCustomerId())
+                .orElseThrow(()->new ResourceNotFoundException("Không thấy người dùng này"));
+
+        User seller = userRepository.findById(responseDto.getSellerId())
+                .orElseThrow(()->new ResourceNotFoundException("Không thấy người bán này"));
+
+        if(customer.getUserStatus() == CustomerStatus.BOOKED){
+            throw new IllegalArgumentException("Khách hàng đã đặt vé");
+        };
+        Buses bus = trip.getBus();
+        int countTicket = ticketRepository.countTicketsByBusId(bus.getId());
+        if(countTicket == bus.getCapacity()){
+            throw  new ResourceNotFoundException("chuyến đi có số lượng "+ bus.getCapacity() + " số vé "+countTicket+" đã hết vé");
+        }
+
+        LoyaltyReward reward = loyaltyRewardRepository.findById(idReward)
+                .orElseThrow(()->new ResourceNotFoundException("Không thấy ưu đãi này"));
+         if(reward.getStatus() == LoyaltyReward.Status.INACTIVE){
+             throw  new RuntimeException("Phần thưởng không còn hoạt động");
+         }
+        LoyaltyPoint loyaltyPoint = loyaltyPointRepository.findAllByCustomerIdOrderByUpdatedAtDesc(customer.getId())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("bạn chưa có điểm nào"));
+// Lấy LoyaltyPoint thực tế
+
+// Lấy tổng điểm hiện có của khách hàng
+        int totalPointCustomer = loyaltyPoint.getPoints();
+
+// So sánh
+        if (totalPointCustomer < reward.getPointsRequired()) {
+            throw new RuntimeException("Bạn không đủ điểm để đổi phần thưởng này.");
+        }else {
+            int currentPoint = totalPointCustomer - reward.getPointsRequired();
+            LoyaltyPoint loyaltyPoints = LoyaltyPoint.builder()
+                    .customer(customer)
+                    .points(currentPoint)
+                    .transactionType(TransactionType.EARN)
+                    .description("Cộng điểm khi mua thêm vé")
+                    .build();
+            loyaltyPointRepository.save(loyaltyPoints);
+        }
+        BigDecimal priceCustomer = new BigDecimal(0);
+        if(reward.getRewardType() == LoyaltyReward.RewardType.TICKET_DISCOUNT){
+            priceCustomer = responseDto.getPrice().multiply(new BigDecimal("0.5"));
+        }
+        Ticket ticket = Ticket.builder()
+                .trip(trip)
+                .seller(seller)
+                .customer(customer)
+                .price(priceCustomer)
+                .seatNumber(responseDto.getSeatNumber())
+                .issuedAt(responseDto.getIssuedAt())
+                .build();
+        ticketRepository.save(ticket);
+
+        customer.setUserStatus(CustomerStatus.BOOKED);
+        userRepository.save(customer);
+        return ticket;
     }
 }

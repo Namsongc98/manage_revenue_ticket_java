@@ -33,6 +33,4 @@ public class LoyaltyPoint extends BaseEntity{
 
     @Column(length = 255)
     private String description;
-
-
 }

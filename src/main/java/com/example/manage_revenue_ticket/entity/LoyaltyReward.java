@@ -18,7 +18,6 @@ public class LoyaltyReward extends BaseEntity {
     private Long id;
 
     private String rewardName; // Ví dụ: "Vé miễn phí", "Giảm 50%", "Voucher 100k"
-    private Integer requiredPoints; // Số điểm cần để đổi
 
     @Enumerated(EnumType.STRING)
     private RewardType rewardType; // TICKET_DISCOUNT, VOUCHER, FREE_TICKET,...

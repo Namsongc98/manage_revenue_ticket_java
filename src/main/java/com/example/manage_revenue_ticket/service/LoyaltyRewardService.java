@@ -2,6 +2,7 @@ package com.example.manage_revenue_ticket.service;
 
 import com.example.manage_revenue_ticket.entity.LoyaltyReward;
 import com.example.manage_revenue_ticket.repository.LoyaltyRewardRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -9,17 +10,24 @@ import java.time.LocalDateTime;
 @Service
 public class LoyaltyRewardService {
 
+    @Autowired
     private LoyaltyRewardRepository rewardRepo;
 
 
 
     public LoyaltyReward create(LoyaltyReward payload) {
-        payload.setCreatedAt(LocalDateTime.now());
-        payload.setUpdatedAt(LocalDateTime.now());
+        System.out.println("payload"+payload.getDescription());
         // ensure status/active consistency
+
+        LoyaltyReward loyaltyReward = new LoyaltyReward();
+        loyaltyReward.setDescription(payload.getDescription());
+        loyaltyReward.setPointsRequired(payload.getPointsRequired());
+        loyaltyReward.setRewardName(payload.getRewardName());
+        loyaltyReward.setRewardType(payload.getRewardType());
+
         if (payload.getStatus() == null) payload.setStatus(LoyaltyReward.Status.ACTIVE);
         if (payload.getActive() == null) payload.setActive(Boolean.TRUE);
-        return rewardRepo.save(payload);
+        return rewardRepo.save(loyaltyReward);
     }
 
     public LoyaltyReward update(Long id, LoyaltyReward payload) {
