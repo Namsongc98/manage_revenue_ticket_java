@@ -1,7 +1,6 @@
 package com.example.manage_revenue_ticket.repository;
 
 import com.example.manage_revenue_ticket.entity.Ticket;
-import com.example.manage_revenue_ticket.entity.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

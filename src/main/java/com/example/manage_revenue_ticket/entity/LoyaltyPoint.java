@@ -2,6 +2,7 @@ package com.example.manage_revenue_ticket.entity;
 
 
 import com.example.manage_revenue_ticket.Enum.TransactionType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -22,10 +23,19 @@ public class LoyaltyPoint extends BaseEntity{
     // Quan hệ tới bảng users (customer)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
+    @JsonIgnore
     private User customer;
 
     @Column(nullable = false)
     private Integer points;
+
+    @Enumerated(EnumType.STRING)
+    private LoyaltyPoint.status status;
+
+    private Integer  alocate;
+
+    @Column( name = "requied_point")
+    private Integer  requiedPoint;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type", nullable = false)
@@ -33,4 +43,8 @@ public class LoyaltyPoint extends BaseEntity{
 
     @Column(length = 255)
     private String description;
+
+    public enum status {
+        UNUSED,REDEEMED
+    }
 }

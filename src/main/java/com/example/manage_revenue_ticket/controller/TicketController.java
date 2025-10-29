@@ -37,8 +37,8 @@ public class TicketController {
     @PostMapping
     @NoAuth
     public ResponseEntity<BaseResponseDto<Ticket>> addTicket(@RequestBody TicketResponseDto responseDto){
-        ticketService.createTicket(responseDto);
-        return ResponseEntity.ok(BaseResponseDto.success(201,"Add Successfully",null));
+        Ticket ticket = ticketService.createTicket(responseDto);
+        return ResponseEntity.ok(BaseResponseDto.success(201,"Add Successfully",ticket));
     };
     // export excel tổng doang thu của 1 xe theo time
     @GetMapping("/summary/excel")

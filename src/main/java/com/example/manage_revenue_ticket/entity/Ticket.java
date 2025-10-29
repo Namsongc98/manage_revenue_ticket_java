@@ -1,6 +1,7 @@
 package com.example.manage_revenue_ticket.entity;
 
 import com.example.manage_revenue_ticket.Enum.CustomerStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,16 +25,19 @@ public class Ticket extends BaseEntity{
     // 🔗 Mỗi vé thuộc về 1 chuyến xe
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id", nullable = false, foreignKey = @ForeignKey(name = "tickets_fk_trip"))
+    @JsonIgnore
     private Trip trip;
 
     // 🔗 Người mua vé (customer)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", foreignKey = @ForeignKey(name = "tickets_fk_customer"))
+    @JsonIgnore
     private User customer;
 
     // 🔗 Nhân viên bán vé (collector)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", foreignKey = @ForeignKey(name = "tickets_fk_seller"))
+    @JsonIgnore
     private User seller;
 
     @Column(name = "seat_number")

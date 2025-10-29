@@ -16,7 +16,6 @@ public class LoyaltyRewardService {
 
 
     public LoyaltyReward create(LoyaltyReward payload) {
-        System.out.println("payload"+payload.getDescription());
         // ensure status/active consistency
 
         LoyaltyReward loyaltyReward = new LoyaltyReward();

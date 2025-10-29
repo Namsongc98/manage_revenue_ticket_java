@@ -72,8 +72,7 @@ public class TicketService {
                 .issuedAt(responseDto.getIssuedAt())
                 .build();
         ticketRepository.save(ticket);
-        Optional<LoyaltyPoint> loyaltyPoint = loyaltyPointRepository.findFirstByCustomerId(customer.getId());
-
+        List<LoyaltyPoint> loyaltyPoint = loyaltyPointRepository.findAllByCustomerIdOrderByUpdatedAtDesc(customer.getId());
         customer.setUserStatus(CustomerStatus.BOOKED);
         userRepository.save(customer);
         List<BaseLoyaltyPoints> baseLoyaltyPoints = baseLoyaltyPointsRepository.findLatestActiveByRole(UserRole.CUSTOMER.name());
@@ -83,24 +82,22 @@ public class TicketService {
         }
         BaseLoyaltyPoints  firstElement = baseLoyaltyPoints.getFirst();
         int ticketsPerPoint = firstElement.getTicketsPerPoint();
-        if(loyaltyPoint.isEmpty()){
 
+        if (loyaltyPoint != null && !loyaltyPoint.isEmpty()) {
+            LoyaltyPoint latestPoint = loyaltyPoint.get(0); // lấy phần tử đầu tiên
+            // 3️⃣ Nếu đã có, kiểm tra tổng số vé để cộng thêm điểm
+            latestPoint.setPoints(latestPoint.getPoints() + ticketsPerPoint);
+            latestPoint.setTransactionType(TransactionType.EARN);
+            loyaltyPointRepository.save(latestPoint);
+        } else {
             LoyaltyPoint loyaltyPoints = LoyaltyPoint.builder()
                     .customer(customer)
                     .points(ticketsPerPoint )
                     .transactionType(TransactionType.EARN)
                     .description("Cộng điểm khi mua thêm vé")
                     .build();
-             loyaltyPointRepository.save(loyaltyPoints);
-        }else {
-            // 3️⃣ Nếu đã có, kiểm tra tổng số vé để cộng thêm điểm
-            LoyaltyPoint loyaltyPointOPT = loyaltyPoint.get();
-            loyaltyPointOPT.setPoints(loyaltyPointOPT.getPoints() + ticketsPerPoint);
-            loyaltyPointOPT.setUpdatedAt(LocalDateTime.now());
-            loyaltyPointOPT.setTransactionType(TransactionType.EARN);
-            loyaltyPointRepository.save(loyaltyPointOPT);
+            loyaltyPointRepository.save(loyaltyPoints);
         }
-
         return ticket;
     };
     // update vé
@@ -174,13 +171,13 @@ public class TicketService {
             throw new RuntimeException("Bạn không đủ điểm để đổi phần thưởng này.");
         }else {
             int currentPoint = totalPointCustomer - reward.getPointsRequired();
-            LoyaltyPoint loyaltyPoints = LoyaltyPoint.builder()
-                    .customer(customer)
-                    .points(currentPoint)
-                    .transactionType(TransactionType.EARN)
-                    .description("Cộng điểm khi mua thêm vé")
-                    .build();
-            loyaltyPointRepository.save(loyaltyPoints);
+            LoyaltyPoint newLoyaltyPoints = new LoyaltyPoint();
+            newLoyaltyPoints.setCustomer(customer);
+            newLoyaltyPoints.setPoints(currentPoint);
+            newLoyaltyPoints.setDescription("Cộng điểm khi mua thêm vé");
+            newLoyaltyPoints.setStatus(LoyaltyPoint.status.REDEEMED);
+            newLoyaltyPoints.setTransactionType(TransactionType.EARN);
+            loyaltyPointRepository.save(newLoyaltyPoints);
         }
         BigDecimal priceCustomer = new BigDecimal(0);
         if(reward.getRewardType() == LoyaltyReward.RewardType.TICKET_DISCOUNT){
