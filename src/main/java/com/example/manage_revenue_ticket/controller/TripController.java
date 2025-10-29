@@ -9,6 +9,9 @@ import com.example.manage_revenue_ticket.anotation.RoleRequired;
 import com.example.manage_revenue_ticket.entity.Trip;
 import com.example.manage_revenue_ticket.service.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +33,12 @@ public class TripController {
     // các chuyến đi đã lên lịch
     @GetMapping("/scheduled")
     @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
-    ResponseEntity<BaseResponseDto<List<Map<String, Object>> >> getTripScheduled(){
-        List<Map<String, Object>>  trip = tripService.getTripScheduled();
+    ResponseEntity<BaseResponseDto<Page<Map<String, Object>>>> getTripScheduled(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Map<String, Object>>  trip = tripService.getTripScheduled(pageable);
         return ResponseEntity.ok(BaseResponseDto.success(200,"create success", trip));
     }
 

@@ -8,6 +8,8 @@ import com.example.manage_revenue_ticket.entity.User;
 import com.example.manage_revenue_ticket.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,13 +34,15 @@ public class SalaryService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private BaseLoyaltyPointsRepository baseLoyaltyPointsRepository;
+
+    // tính lương của Driver theo tháng
     @Transactional
-    public List<Salary> generateMonthlySalaries(byte month, short year) {
+    public void generateMonthlySalaries(byte month, short year) {
         LocalDate salaryDate = LocalDate.of(year, month, 1);
 
         List<Object[]> driverTrips = tripRepository.countCompletedTripsByDriver(month, year, null);
-        List<Salary> savedSalaries = new ArrayList<>();
-        System.out.println("driverTrips::::::::::"+driverTrips);
         for (Object[] row : driverTrips) {
             Long driverId = ((Number) row[0]).longValue();
             User user = userRepository.findById(driverId)
@@ -67,12 +71,15 @@ public class SalaryService {
             salary.setSalary(total);
             salary.setPeriodMonth(month);
             salary.setPeriodYear(year);
-            Salary saved = salaryRepository.save(salary);
-            savedSalaries.add(saved);
+            salaryRepository.save(salary);
         };
-        return savedSalaries;
     }
 
+    public Page<Salary> selectSalaryMonth(byte month, short year, Pageable pageable){
+        return salaryRepository.selectSalaryMonth(month, year, pageable);
+    }
+
+    // tính lương tháng của từng nhân viên
     @Transactional
     public Salary generateMonthlySalariesRoleUser(byte month, short year, Long userId){
 
@@ -102,11 +109,10 @@ public class SalaryService {
                 .add(bonus)
                 .add(commissionTotal)
                 .add(allowance);
-        BigDecimal total = baseSalary.add(allowance);
 
         Salary salary = new Salary();
         salary.setUser(user);
-        salary.setSalary(total);
+        salary.setSalary(salaryTotal);
         salary.setPeriodMonth(month);
         salary.setPeriodYear(year);
         Salary saved = salaryRepository.save(salary);

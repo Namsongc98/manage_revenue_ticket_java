@@ -25,8 +25,6 @@ public class BaseResponseDto<T> {
                 .timestamp(System.currentTimeMillis())
                 .build();
     }
-
-
     // ❌ Error response
     public static <T> BaseResponseDto<T> error(int status, String message) {
         return BaseResponseDto.<T>builder()
@@ -36,6 +34,4 @@ public class BaseResponseDto<T> {
                 .timestamp(System.currentTimeMillis())
                 .build();
     }
-
-
 }

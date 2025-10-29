@@ -10,7 +10,9 @@ import java.util.Map;
 
 @Service
 public class FileService {
-    public ByteArrayOutputStream createExcelFile(List<Map<String, Object>> data) throws IOException {
+
+
+    public ByteArrayOutputStream exportTicketSummaryToExcel(List<Map<String, Object>> data) throws IOException {
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Ticket Summary");

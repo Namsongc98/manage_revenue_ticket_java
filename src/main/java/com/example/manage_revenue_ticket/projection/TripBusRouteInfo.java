@@ -5,14 +5,14 @@ import java.time.LocalDateTime;
 
 public interface TripBusRouteInfo {
     Long getBusId();
-    String getBienSoXe();
-    Integer getDungTich();
+    String getPlateNumber();
+    Integer getCapacity();
     String getBusStatus();
-    BigDecimal getDoanhThu();
-    LocalDateTime getKhoiHanhTime();
-    LocalDateTime getDenTime();
-    String getTenChuyen();
-    String getChoKhoiHang();
-    String getChoDen();
+    BigDecimal getRevenue();
+    LocalDateTime getDepartureTime();
+    LocalDateTime getArrivalTime();
+    String getNameTrip();
+    String getStartPoint();
+    String geTenPoint();
     Double getKm();
 }

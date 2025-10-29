@@ -13,9 +13,8 @@ public class RouteService {
     @Autowired
     private RouteRepository projectRepository;
 
-
+    // tạo tuyến đường
     public Route createRoute(RouteRequestDto requestDto){
-        System.out.println(requestDto.getRouteName());
         Route route;
         route = Route.builder()
                 .distanceKm(requestDto.getDistanceKm())
@@ -27,7 +26,7 @@ public class RouteService {
 
        return projectRepository.save(route);
     }
-
+    // thay đổi tuyến đường
     public void updateRoute(Long routeId, RouteRequestDto requestDto){
         Route route;
         route = projectRepository.findById(routeId)

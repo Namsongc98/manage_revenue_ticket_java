@@ -1,7 +1,6 @@
 package com.example.manage_revenue_ticket.repository;
 
 import com.example.manage_revenue_ticket.entity.Ticket;
-import com.example.manage_revenue_ticket.entity.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,12 +28,12 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query(value = """
         SELECT 
-            b.id AS bus_id,
-            b.plate_number AS bienSoXe,
-            u_seller.email AS nhanVienThuVe,
-            u_driver.email AS laiXe,
-            COUNT(tk.id) AS tongSoVe,
-            SUM(tk.price) AS tongTienVe
+            b.id AS busId,
+            b.plate_number AS plateNumber,
+            u_seller.email AS seller,
+            u_driver.email AS driver,
+            COUNT(tk.id) AS totalTicket,
+            SUM(tk.price) AS totalPrice
         FROM tickets tk
         JOIN trips tr ON tk.trip_id = tr.id
         JOIN buses b ON tr.bus_id = b.id

@@ -35,14 +35,14 @@ public class TicketController {
     private FileService excelService;
 
     @PostMapping
-    @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
-    public ResponseEntity<BaseResponseDto<Ticket>> addTicket(@RequestBody TicketResponseDto responseDto){
-        ticketService.createTicket(responseDto);
-        return ResponseEntity.ok(BaseResponseDto.success(201,"Add Successfully",null));
-    };
-    // export excel list ticket of bus in time
-    @GetMapping("/summary/excel")
     @NoAuth
+    public ResponseEntity<BaseResponseDto<Ticket>> addTicket(@RequestBody TicketResponseDto responseDto){
+        Ticket ticket = ticketService.createTicket(responseDto);
+        return ResponseEntity.ok(BaseResponseDto.success(201,"Add Successfully",ticket));
+    };
+    // export excel tổng doang thu của 1 xe theo time
+    @GetMapping("/summary/excel")
+    @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
     public ResponseEntity<byte[]> exportTicketSummaryToExcel(
             @RequestParam(required = false) Long busId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd:HH:mm:ss") LocalDateTime fromDate,
@@ -52,7 +52,7 @@ public class TicketController {
             List<Map<String, Object>> summaryData = ticketService.getTicketSummaryByBusAndTime(busId, fromDate, toDate);
 
             // Tạo file Excel từ dữ liệu
-            ByteArrayOutputStream outputStream = excelService.createExcelFile(summaryData);
+            ByteArrayOutputStream outputStream = excelService.exportTicketSummaryToExcel(summaryData);
 
             // Thiết lập các header cho response
             HttpHeaders headers = new HttpHeaders();
@@ -67,6 +67,7 @@ public class TicketController {
         }
     }
 
+    // sửa ticket
     @PutMapping("/{tripId}")
     @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
     public ResponseEntity<BaseResponseDto<Ticket>> updateTicket(@PathVariable String tripId, @RequestBody TicketResponseDto responseDto){
@@ -74,6 +75,7 @@ public class TicketController {
         return ResponseEntity.ok(BaseResponseDto.success(201,"update Successfully",null));
     }
 
+    // ticket tổng doang thu của 1 xe theo time
     @GetMapping("/summary")
     @RoleRequired({UserRole.ADMIN,UserRole.EMPLOYEE})
     public ResponseEntity<BaseResponseDto<?>> getTicketSummaryByBusAndTime(
@@ -82,6 +84,18 @@ public class TicketController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
         List<Map<String, Object>> result = ticketService.getTicketSummaryByBusAndTime(busId, fromDate, toDate);
         return ResponseEntity.ok(BaseResponseDto.success(201,"Get Successfully",result));
+    }
+
+    @PostMapping("/loyalty_reward/{idReward}")
+    @NoAuth
+    public  ResponseEntity<BaseResponseDto<Ticket>> createticketByLoyalty(
+            @RequestBody TicketResponseDto responseDto,
+            @PathVariable Long idReward
+    ){
+        Ticket ticket =  ticketService.createticketByLoyalty(responseDto, idReward);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(BaseResponseDto.success(201, "Add Successfully", ticket));
     }
 
 
