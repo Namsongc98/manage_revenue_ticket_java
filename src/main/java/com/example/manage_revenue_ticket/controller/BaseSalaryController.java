@@ -3,7 +3,7 @@ package com.example.manage_revenue_ticket.controller;
 import com.example.manage_revenue_ticket.Dto.request.BaseSalaryRequestDTO;
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
 import com.example.manage_revenue_ticket.Enum.UserRole;
-import com.example.manage_revenue_ticket.anotation.NoAuth;
+import com.example.manage_revenue_ticket.anotation.PublicApi;
 import com.example.manage_revenue_ticket.anotation.RoleRequired;
 import com.example.manage_revenue_ticket.entity.BaseSalary;
 import com.example.manage_revenue_ticket.service.BaseSalaryService;
@@ -28,7 +28,7 @@ public class BaseSalaryController {
     }
 
     @PutMapping("/{id}")
-    @NoAuth
+    @PublicApi
     public ResponseEntity<BaseResponseDto<BaseSalary>> updateBaseSalary(@PathVariable String id, @RequestBody BaseSalaryRequestDTO request) {
         baseSalaryService.updateBaseSalary(Long.parseLong(id), request.getBaseSalary());
         return ResponseEntity.ok(BaseResponseDto.success(200,"update success", null));

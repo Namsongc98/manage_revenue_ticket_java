@@ -3,16 +3,13 @@ package com.example.manage_revenue_ticket.controller;
 import com.example.manage_revenue_ticket.Dto.request.BusRequest;
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
 import com.example.manage_revenue_ticket.Enum.UserRole;
-import com.example.manage_revenue_ticket.anotation.NoAuth;
 import com.example.manage_revenue_ticket.anotation.RoleRequired;
-import com.example.manage_revenue_ticket.entity.BaseEntity;
 import com.example.manage_revenue_ticket.entity.Buses;
 import com.example.manage_revenue_ticket.service.BusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -3,8 +3,9 @@ package com.example.manage_revenue_ticket.controller;
 import com.example.manage_revenue_ticket.Dto.request.TripRequestDto;
 
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
+import com.example.manage_revenue_ticket.Dto.response.RevenueResponse;
 import com.example.manage_revenue_ticket.Enum.UserRole;
-import com.example.manage_revenue_ticket.anotation.NoAuth;
+import com.example.manage_revenue_ticket.anotation.PublicApi;
 import com.example.manage_revenue_ticket.anotation.RoleRequired;
 import com.example.manage_revenue_ticket.entity.Trip;
 import com.example.manage_revenue_ticket.service.TripService;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -49,5 +49,17 @@ public class TripController {
         Trip trip = tripService.updateTrip(Long.parseLong(tripId),requestDto);
         return ResponseEntity.ok(BaseResponseDto.success(201,"create success", trip));
     }
+
+
+
+  public TripController(TripService revenueTripService) {
+    this.tripService = revenueTripService;
+  }
+
+  @GetMapping("/{tripId}/revenue")
+  @PublicApi
+  public RevenueResponse getRevenue(@PathVariable int tripId) {
+    return tripService.getRevenue(tripId);
+  }
 
 }

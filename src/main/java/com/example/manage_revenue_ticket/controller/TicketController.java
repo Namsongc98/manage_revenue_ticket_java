@@ -3,9 +3,8 @@ package com.example.manage_revenue_ticket.controller;
 import com.example.manage_revenue_ticket.Dto.request.TicketResponseDto;
 import com.example.manage_revenue_ticket.Dto.response.BaseResponseDto;
 import com.example.manage_revenue_ticket.Enum.UserRole;
-import com.example.manage_revenue_ticket.anotation.NoAuth;
+import com.example.manage_revenue_ticket.anotation.PublicApi;
 import com.example.manage_revenue_ticket.anotation.RoleRequired;
-import com.example.manage_revenue_ticket.entity.BaseEntity;
 import com.example.manage_revenue_ticket.entity.Ticket;
 import com.example.manage_revenue_ticket.service.FileService;
 import com.example.manage_revenue_ticket.service.TicketService;
@@ -35,7 +34,7 @@ public class TicketController {
     private FileService excelService;
 
     @PostMapping
-    @NoAuth
+    @PublicApi
     public ResponseEntity<BaseResponseDto<Ticket>> addTicket(@RequestBody TicketResponseDto responseDto){
         Ticket ticket = ticketService.createTicket(responseDto);
         return ResponseEntity.ok(BaseResponseDto.success(201,"Add Successfully",ticket));
@@ -87,7 +86,7 @@ public class TicketController {
     }
 
     @PostMapping("/loyalty_reward/{idReward}")
-    @NoAuth
+    @PublicApi
     public  ResponseEntity<BaseResponseDto<Ticket>> createticketByLoyalty(
             @RequestBody TicketResponseDto responseDto,
             @PathVariable Long idReward
