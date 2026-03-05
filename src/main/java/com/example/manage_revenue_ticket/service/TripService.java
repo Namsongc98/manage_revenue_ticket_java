@@ -58,20 +58,36 @@ public class TripService {
       );
   }
 
-  @Cacheable(value = "revenue_cache", key = "#tripId")
+  @Cacheable(value = "revenue_cache", key = "#tripId", unless = "#result == null")
   public RevenueResponse getRevenue(int tripId) {
+    try {
+      // Log này chỉ hiện nếu KHÔNG tìm thấy data trong Redis (Cache Miss)
+      System.out.println("🔍 [Cache Miss] Đang gọi Database cho tripId: " + tripId);
 
-    System.out.println("🔥 Gọi DB vì chưa có cache...");
+      Map<String, Object> params = new HashMap<>();
+      params.put("p_trip_id", tripId);
 
-    Map<String, Object> params = new HashMap<>();
-    params.put("p_trip_id", tripId);
+      // Gọi Procedure
+      Map<String, Object> result = simpleJdbcCall.execute(params);
 
-    Map<String, Object> result = simpleJdbcCall.execute(params);
+      BigDecimal total = (BigDecimal) result.get("total");
+      BigDecimal average = (BigDecimal) result.get("average");
 
-    BigDecimal total = (BigDecimal) result.get("total");
-    BigDecimal average = (BigDecimal) result.get("average");
+      System.out.println("✅ Lấy dữ liệu từ DB thành công cho tripId: " + tripId);
+      return new RevenueResponse(tripId, total, average);
 
-    return new RevenueResponse(tripId, total, average);
+    } catch (org.springframework.dao.QueryTimeoutException e) {
+      System.err.println("❌ Lỗi Timeout khi gọi Database: " + e.getMessage());
+      throw e;
+    } catch (org.springframework.data.redis.RedisConnectionFailureException e) {
+      // Lỗi này cực kỳ quan trọng nếu Redis Cluster của bạn chưa thông
+      System.err.println("❌ Lỗi kết nối Redis Cluster: " + e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      System.err.println("💥 Lỗi không xác định tại getRevenue: " + e.getClass().getName() + " - " + e.getMessage());
+      e.printStackTrace(); // In stacktrace để debug dòng bị lỗi
+      throw new RuntimeException("Lỗi xử lý doanh thu: " + e.getMessage());
+    }
   }
 
 

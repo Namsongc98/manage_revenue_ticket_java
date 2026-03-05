@@ -11,6 +11,7 @@ import com.example.manage_revenue_ticket.service.AuthService;
 import com.example.manage_revenue_ticket.service.UserService;
 import com.example.manage_revenue_ticket.util.JwtUtil;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     @Autowired
@@ -61,8 +63,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponseDto.success(201, "Update Password successfully",null));
     }
-  @Autowired
-  private RedisTemplate<String, Object> redisTemplate;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
     @PostMapping("/login")
     @PublicApi
     public ResponseEntity<BaseResponseDto<TokenResponse>> login(@RequestBody UserRequestDto req){

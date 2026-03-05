@@ -56,7 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             System.out.println("Request path: " + path);
 
             // Ví dụ: bỏ qua auth cho ảnh avatar
-            if (path.startsWith("/avatars/") || path.startsWith("/api/auth/") || path.startsWith("/api/ticket/summary/excel") ||  path.startsWith("/api/auth/redis-test")) {
+            if (path.startsWith("/avatars/") || path.startsWith("/api/auth/") || path.startsWith("/api/ticket/summary/excel") ||  path.startsWith("/api/redis-test")) {
                 filterChain.doFilter(request, response);
                 return;
             }else {
